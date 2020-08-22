@@ -11,7 +11,7 @@ console.log(chalk.blue(`Workerpack (${package.version})`));
 console.log(chalk.blue('Created by pwp.app'));
 
 program
-    .command('pack [target]')
+    .command('build [target]')
     .description('Pack your static files into a single script')
     .action((target) => {
         if (!target) {
@@ -19,7 +19,7 @@ program
             process.exit(-1);
         }
         const builder = new Builder(target);
-        const dest = builder.build();
+        builder.build();
     });
 
 program.parse(process.argv);
