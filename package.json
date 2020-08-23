@@ -11,6 +11,8 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "commander": "^6.0.0",
-    "terser": "^5.2.1"
+    "dayjs": "^1.8.34",
+    "mime": "^2.4.6",
+    "shelljs": "^0.8.4"
   }
 }

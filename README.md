@@ -21,16 +21,22 @@ npm install workerpack -g
 Create a configuration file in your project directory named "workerpack.conf.js", following is a template of the configuration.
 
 ```javascript
-{
+module.exports = {
   host: '', // host of your Cloudflare Worker, like "test.pwp.worker.dev"
   target: '', // the path of a directory you want to pack
   loader: [
     {
-      test: /.js$/ // a pattern to match file name
-      type: 'application/x-javascript', // MIME type of matched files
+      test: /\.js$/ // a pattern to match file name
+      type: 'application/x-javascript', // specify MIME type of matched files.
+    },
+    // or you can set loader like this:
+    {
+      ext: '.js', // just set the ext of files
     }
   ],
-  output: './output/worker.js' // output path
+  output: './output', // output path
+  run_before_build: ['npm run build'], // command lines you want to run before build
+  run_after_build: [], // command lines you want to run after build
 }
 ```
 
@@ -49,3 +55,7 @@ workerpack build ./dist
 In this command line, "./dist" is the path of a directory you want to pack.
 
 Then wait the program done, and put the content of output script into your worker.
+
+## License
+
+MIT

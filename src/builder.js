@@ -1,7 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
-const { minify } = require('terser');
+const dayjs = require('dayjs');
+const shell = require('shelljs');
+const mime = require('mime');
 
 const getPath = (p) => path.resolve('./', p);
 
@@ -64,12 +66,32 @@ class Builder {
         this.mimeMap = {};
         let index = 0;
 
-        for (const item of loader) {
-            if (!this.mime[item.type]) {
-                this.mime[item.type] = index;
-                this.mimeMap[index] = item.type;
+        this.loader.forEach((loader) => {
+            let type;
+            if (loader.test && loader.type) {
+                type = loader.type;
+            } else if (loader.ext) {
+                type = mime.getType(loader.ext);
+            } else {
+                console.log(chalk.red('Cannot resolve the loader, please check you config.'));
+                process.exit(-1);
+            }
+            if (!this.mime[type]) {
+                this.mime[type] = index;
+                this.mimeMap[index] = type;
                 index++;
             }
+        });
+
+        // run command lines before build
+        const { run_before_build } = this.config;
+        if (run_before_build && Array.isArray(run_before_build)) {
+            run_before_build.forEach((cmd) => {
+                if (typeof cmd === 'string') {
+                    console.log(chalk.gray(`Running command before build: [${cmd}]`));
+                    shell.exec(cmd);
+                }
+            });
         }
 
         this.read(this.path);
@@ -83,13 +105,27 @@ class Builder {
                 this.read(filePath);
             } else if (stat.isFile()) {
                 this.loader.forEach((loader) => {
-                    if (loader.test.test(filePath)) {
-                        this.assets[filePath.replace(this.path, '').replace(/\\/g, '/')] = {
-                            c: fs.readFileSync(filePath, {
-                                encoding: 'utf-8',
-                            }),
-                            t: this.mime[loader.type],
-                        };
+                    if (loader.test) {
+                        if (loader.test.test(filePath)) {
+                            this.assets[filePath.replace(this.path, '').replace(/\\/g, '/')] = {
+                                c: fs.readFileSync(filePath, {
+                                    encoding: 'utf-8',
+                                }),
+                                t: this.mime[loader.type],
+                            };
+                        }
+                    } else if (loader.ext) {
+                        if (filePath.endsWith(loader.ext)) {
+                            this.assets[filePath.replace(this.path, '').replace(/\\/g, '/')] = {
+                                c: fs.readFileSync(filePath, {
+                                    encoding: 'utf-8',
+                                }),
+                                t: this.mime[mime.getType(loader.ext)],
+                            };
+                        }
+                    } else {
+                        console.log(chalk.red('Cannot resolve the loader, please check you config.'));
+                        process.exit(-1);
                     }
                 });
             }
@@ -122,8 +158,44 @@ class Builder {
             fs.mkdirSync(getPath('./output'));
         }
 
-        fs.writeFileSync(getPath(output ? output : './output/cf-worker.js'), template);
+        const outputFile = `cf-worker.${dayjs().format('YYYYMMDDHHmmss')}.js`;
+        let outputPath;
 
+        if (output) {
+            outputPath = getPath(output.endsWith('/') ? `${output}${outputFile}` : `${output}/${outputFile}`);
+        }
+
+        try {
+            fs.writeFileSync(outputPath, template);
+        } catch (err) {
+            console.error(chalk.red('Failed to write file.'));
+            return;
+        }
+
+        // check file size
+        const outputStat = fs.statSync(outputPath);
+        if (outputStat) {
+            const size = outputStat.size / 1024 / 1024;
+            if (size >= 1) {
+                console.log(chalk.yellow('Warning: the output file size is over 1MB, it may touch the limit of Cloudflare Worker free plan.'));
+            }
+        }
+
+        this.afterBuild();
+    }
+    afterBuild() {
+        // run command lines after build
+        const { run_after_build } = this.config;
+        if (run_after_build && Array.isArray(run_after_build)) {
+            run_after_build.forEach((cmd) => {
+                if (typeof cmd === 'string') {
+                    console.log(chalk.gray(`Running command after build: [${cmd}]`));
+                    shell.exec(cmd);
+                }
+            });
+        }
+
+        // print tip
         console.log(chalk.green('Packing is done, you can paste the script to Cloudflare Worker now!'));
     }
 }
