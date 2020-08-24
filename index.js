@@ -3,6 +3,7 @@
 const { program } = require('commander');
 const chalk = require('chalk');
 const package = require('./package.json');
+
 program.version(package.version);
 
 const Builder = require('./src/builder');
