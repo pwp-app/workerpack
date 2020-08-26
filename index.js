@@ -7,6 +7,7 @@ const package = require('./package.json');
 program.version(package.version);
 
 const Builder = require('./src/builder');
+const Initializer = require('./src/initializer');
 
 console.log(chalk.blue(`Workerpack (${package.version})`));
 console.log(chalk.blue('Created by pwp.app'));
@@ -21,6 +22,14 @@ program
         }
         const builder = new Builder(target);
         builder.build();
+    });
+
+program
+    .command('init')
+    .description('Init configuration for your project')
+    .action(() => {
+        const initializer = new Initializer();
+        initializer.init();
     });
 
 program.parse(process.argv);

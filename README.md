@@ -1,3 +1,5 @@
+<div align="center"><img src="https://raw.githubusercontent.com/pwp-app/workerpack/master/logo.png" width="90"></div>
+
 # Workerpack
 
 ## What is Workerpack
