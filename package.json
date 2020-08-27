@@ -1,5 +1,5 @@
 {
-  "name": "workerpack",
+  "name": "workerpack-cli",
   "version": "1.0.0",
   "description": "A tool let you bundle your static website file into a Clouflare Worker script",
   "main": "index.js",

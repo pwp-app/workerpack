@@ -15,7 +15,7 @@ This tool is made for this purpose, you can use it to pack your small site and d
 ### Install
 
 ```bash
-npm install workerpack -g
+npm install workerpack-cli -g
 ```
 
 ### Usage
