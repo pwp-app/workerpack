@@ -98,7 +98,7 @@ class Initializer {
                 ]);
                 if (cmdInput.commands) {
                     const commands = cmdInput.commands.split(',');
-                    config.run_before_shell = (commands.map((cmd) => typeof cmd === 'string' ? cmd.trim() : null)).filter((cmd) => cmd ? true : false);
+                    config.run_before_build = (commands.map((cmd) => typeof cmd === 'string' ? cmd.trim() : null)).filter((cmd) => cmd ? true : false);
                 }
             }
         }
@@ -120,7 +120,7 @@ class Initializer {
                 ]);
                 if (cmdInput.commands) {
                     const commands = cmdInput.commands.split(',');
-                    config.run_after_shell = (commands.map((cmd) => typeof cmd === 'string' ? cmd.trim() : null)).filter((cmd) => cmd ? true : false);
+                    config.run_after_build = (commands.map((cmd) => typeof cmd === 'string' ? cmd.trim() : null)).filter((cmd) => cmd ? true : false);
                 }
             }
         }

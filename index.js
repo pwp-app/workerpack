@@ -16,10 +16,6 @@ program
     .command('build [target]')
     .description('Pack your static files into a single script')
     .action((target) => {
-        if (!target) {
-            console.log(chalk.red('Target path cannot be empty'));
-            process.exit(-1);
-        }
         const builder = new Builder(target);
         builder.build();
     });

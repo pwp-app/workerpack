@@ -104,22 +104,41 @@ class Builder {
             if (stat.isDirectory()) {
                 this.read(filePath);
             } else if (stat.isFile()) {
+                let checkPath = this.path.replace(/\.?\.\//gi, '');
+                if (checkPath.endsWith('/')) {
+                    checkPath = checkPath.substring(0, checkPath.length - 1);
+                }
                 this.loader.forEach((loader) => {
                     if (loader.test) {
                         if (loader.test.test(filePath)) {
-                            this.assets[filePath.replace(this.path, '').replace(/\\/g, '/')] = {
-                                c: fs.readFileSync(filePath, {
+                            let content = '';
+                            try {
+                                content = fs.readFileSync(filePath, {
                                     encoding: 'utf-8',
-                                }),
+                                });
+                            } catch (err) {
+                                console.log(chalk.red(`Cannot read file [${filePath}]`));
+                                process.exit(-1);
+                            }
+                            console.log(content);
+                            this.assets[filePath.replace(/\\/g, '/').replace(checkPath, '')] = {
+                                c: content,
                                 t: this.mime[loader.type],
                             };
                         }
                     } else if (loader.ext) {
                         if (filePath.endsWith(loader.ext)) {
-                            this.assets[filePath.replace(this.path, '').replace(/\\/g, '/')] = {
-                                c: fs.readFileSync(filePath, {
+                            let content = '';
+                            try {
+                                content = fs.readFileSync(filePath, {
                                     encoding: 'utf-8',
-                                }),
+                                });
+                            } catch (err) {
+                                console.log(chalk.red(`Cannot read file [${filePath}]`));
+                                process.exit(-1);
+                            }
+                            this.assets[filePath.replace(/\\/g, '/').replace(checkPath, '')] = {
+                                c: content,
                                 t: this.mime[mime.getType(loader.ext)],
                             };
                         }
@@ -145,17 +164,28 @@ class Builder {
         });
 
         template = template.replace('__CF_HOST__', this.host);
-        template = template.replace('__CF_SITE_DATA__', JSON.stringify(this.assets));
+        const siteDataIdx = template.indexOf('__CF_SITE_DATA__');
+        template = template.substring(0, siteDataIdx) + JSON.stringify(this.assets) + template.substring(siteDataIdx + '__CF_SITE_DATA__'.length);
         template = template.replace('__CF_MIME__', JSON.stringify(this.mimeMap));
 
         const { output } = this.config;
 
         if (output && !fs.existsSync(output)) {
-            console.log(chalk.red('Output path is not exist.'));
+            try {
+                fs.mkdirSync(output);
+            } catch (err) {
+                console.log(chalk.red('Output path did not exist, and we cannot create output directory.'));
+                process.exit(-1);
+            }
         }
 
         if (!output && !fs.existsSync(getPath('./output'))) {
-            fs.mkdirSync(getPath('./output'));
+            try {
+                fs.mkdirSync(getPath('./output'));
+            } catch (err) {
+                console.log(chalk.red('Cannot create output directory.'));
+                process.exit(-1);
+            }
         }
 
         const outputFile = `cf-worker.${dayjs().format('YYYYMMDDHHmmss')}.js`;

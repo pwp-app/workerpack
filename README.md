@@ -58,6 +58,12 @@ In this command line, "./dist" is the path of a directory you want to pack.
 
 Then wait the program done, and put the content of output script into your worker.
 
+### Tips
+
+We recommend to import assets through CDN rather than use npm package or just put it in the project directory, that will help you reduce the size of output script.
+
+Also, we recommend to use SVG icons rather than images, this tool hasn't supported pack image or other binary files yet.
+
 ## License
 
 MIT
