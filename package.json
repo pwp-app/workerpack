@@ -1,6 +1,6 @@
 {
   "name": "workerpack-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tool let you bundle your static website file into a Clouflare Worker script",
   "main": "index.js",
   "bin": {
@@ -9,11 +9,11 @@
   "author": "BackRunner",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^4.1.0",
-    "commander": "^6.0.0",
-    "dayjs": "^1.8.34",
+    "chalk": "^4.1.2",
+    "commander": "^6.2.1",
+    "dayjs": "^1.10.6",
     "inquirer": "^7.3.3",
-    "mime": "^2.4.6",
+    "mime": "^2.5.2",
     "shelljs": "^0.8.4",
     "stringify-object": "^3.3.0"
   }
